@@ -40,6 +40,17 @@ class mysqlExecutor extends Executor {
       sql: query
     };
 
+    // Optional per-query timeout (in milliseconds), mapped to mysql2's native
+    // query `timeout`. It guards against a query that never settles: e.g. when
+    // the database server silently drops an idle/pooled connection, mysql2 may
+    // emit only a non-fatal "packets out of order" warning instead of an error,
+    // leaving the query — and therefore the whole Runnerty chain — hung forever.
+    // When set, mysql2 raises a PROTOCOL_SEQUENCE_TIMEOUT error on expiry, which
+    // is handled by the `error` listeners below so the process always ends.
+    if (params.queryTimeout) {
+      queryOptions.timeout = params.queryTimeout;
+    }
+
     if (params.localInFile) {
       if (fs.existsSync(params.localInFile)) {
         queryOptions.infileStreamFactory = () => {
@@ -304,6 +315,10 @@ class mysqlExecutor extends Executor {
   }
 
   _error(errMsg) {
+    // Settle only once: a hung query recovered via `queryTimeout` can surface an
+    // error from both the query stream and the pool-level `error` listener.
+    if (this.ended) return;
+    this.ended = true;
     this.endOptions.end = 'error';
     this.endOptions.messageLog = errMsg || this.endOptions.messageLog;
     this.endOptions.err_output = errMsg || this.endOptions.err_output;

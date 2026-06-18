@@ -65,24 +65,41 @@ Add in [config.json]:
 }
 ```
 
+A `queryTimeout` (in milliseconds) set here applies to **every** query run through this executor (it can still be overridden per query in the plan):
+
+```json
+{
+  "id": "mysql_default",
+  "type": "@runnerty-executor-mysql",
+  "user": "mysqlusr",
+  "password": "mysqlpass",
+  "database": "MYDB",
+  "host": "myhost.com",
+  "port": "3306",
+  "queryTimeout": 30000
+}
+```
+
 #### Configuration params:
 
-| Parameter          | Description                                                                                                 |
-| :----------------- | :---------------------------------------------------------------------------------------------------------- |
-| user               | The MySQL user to authenticate as.                                                                          |
-| password           | The password of that MySQL user.                                                                            |
-| database           | Name of the database to use for this connection. (Optional)                                                 |
-| host               | The hostname of the database you are connecting to.                                                         |
-| port               | The port number to connect to. (Default: 3306)                                                              |
-| socketPath         | The path to a unix domain socket to connect to. When used host and port are ignored. (Optional)             |
-| charset            | The charset for the connection (collation). (Default: 'UTF8_GENERAL_CI')                                    |
-| timezone           | The timezone configured on the MySQL server. (Default: 'local')                                             |
-| insecureAuth       | Allow connecting to MySQL instances that ask for the old (insecure) authentication method. (Default: false) |
-| flags              | Connection flags. More information [here](https://github.com/mysqljs/mysql#connection-flags).               |
-| multipleStatements | Allow multiple mysql statements per query. (Default: true)                                                  |
-| ssl/ca             | SSL CA File (Optional)                                                                                      |
-| ssl/cert           | SSL CERT File (Optional)                                                                                    |
-| ssl/key            | SSL KEY File (Optional)                                                                                     |
+| Parameter          | Description                                                                                                                                                                                                                                                                                                                                                                                                  |
+| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| user               | The MySQL user to authenticate as.                                                                                                                                                                                                                                                                                                                                                                           |
+| password           | The password of that MySQL user.                                                                                                                                                                                                                                                                                                                                                                             |
+| database           | Name of the database to use for this connection. (Optional)                                                                                                                                                                                                                                                                                                                                                  |
+| host               | The hostname of the database you are connecting to.                                                                                                                                                                                                                                                                                                                                                          |
+| port               | The port number to connect to. (Default: 3306)                                                                                                                                                                                                                                                                                                                                                               |
+| socketPath         | The path to a unix domain socket to connect to. When used host and port are ignored. (Optional)                                                                                                                                                                                                                                                                                                              |
+| charset            | The charset for the connection (collation). (Default: 'UTF8_GENERAL_CI')                                                                                                                                                                                                                                                                                                                                     |
+| timezone           | The timezone configured on the MySQL server. (Default: 'local')                                                                                                                                                                                                                                                                                                                                              |
+| insecureAuth       | Allow connecting to MySQL instances that ask for the old (insecure) authentication method. (Default: false)                                                                                                                                                                                                                                                                                                  |
+| flags              | Connection flags. More information [here](https://github.com/mysqljs/mysql#connection-flags).                                                                                                                                                                                                                                                                                                                |
+| multipleStatements | Allow multiple mysql statements per query. (Default: true)                                                                                                                                                                                                                                                                                                                                                   |
+| connectTimeout     | Milliseconds before a timeout occurs during the initial connection to the MySQL server. (Default: 60000)                                                                                                                                                                                                                                                                                                     |
+| queryTimeout       | Milliseconds before an unresponsive query is aborted with a timeout error. Prevents a hung query from blocking the chain forever — e.g. when the server silently drops an idle/pooled connection and mysql2 reports it only as a non-fatal "packets out of order" warning. Disabled by default (no timeout). Applies to every query of this executor and can be overridden per query in the plan. (Optional) |
+| ssl/ca             | SSL CA File (Optional)                                                                                                                                                                                                                                                                                                                                                                                       |
+| ssl/cert           | SSL CERT File (Optional)                                                                                                                                                                                                                                                                                                                                                                                     |
+| ssl/key            | SSL KEY File (Optional)                                                                                                                                                                                                                                                                                                                                                                                      |
 
 ### Plan sample:
 
@@ -99,6 +116,16 @@ Add in [plan.json]:
 {
   "id": "mysql_default",
   "command": "SELECT NOW()"
+}
+```
+
+Overriding the timeout for a single query (in milliseconds) with `queryTimeout`. This takes precedence over the executor-level `queryTimeout`:
+
+```json
+{
+  "id": "mysql_default",
+  "command": "SELECT NOW()",
+  "queryTimeout": 30000
 }
 ```
 

@@ -57,6 +57,9 @@
         "connectTimeout": {
           "type": "number"
         },
+        "queryTimeout": {
+          "type": "number"
+        },
         "dateStrings": {
           "type": ["boolean", "string"]
         },
@@ -112,6 +115,9 @@
             "command": {
               "type": "string"
             },
+            "queryTimeout": {
+              "type": "number"
+            },
             "args": {
               "type": "object"
             },
@@ -144,6 +150,9 @@
             },
             "command_file": {
               "type": "string"
+            },
+            "queryTimeout": {
+              "type": "number"
             },
             "args": {
               "type": "object"
